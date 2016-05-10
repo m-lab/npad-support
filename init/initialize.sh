@@ -97,6 +97,15 @@ sed -e "s;RSYNCDIR_SS;$RSYNCDIR_SS;" \
     -e "s;RSYNCDIR_NPAD;$RSYNCDIR_NPAD;" \
     -e "s;RSYNCDIR_PTR;$RSYNCDIR_PTR;" \
     $SLICEHOME/conf/rsyncd.conf.in > /etc/rsyncd.conf
+
+# Allow CIRA rsync access to the paris-traceroute module at their own sites
+for site in yyz01 yyc01 yul01; do
+    if [[ "$HOSTNAME" =~ "$site" ]]; then
+        HOSTS_ALLOW=$(grep 'hosts allow' $SLICEHOME/conf/rsyncd.conf.in)
+        echo "    ${HOSTS_ALLOW}, 192.211.124.208/28" >> /etc/rsyncd.conf
+    fi
+done
+
 mkdir -p $RSYNCDIR_SS
 mkdir -p $RSYNCDIR_NPAD
 mkdir -p $RSYNCDIR_PTR
