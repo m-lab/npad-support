@@ -100,9 +100,9 @@ sed -e "s;RSYNCDIR_SS;$RSYNCDIR_SS;" \
 
 # Allow CIRA rsync access to the paris-traceroute module at their own sites
 for site in "yyz01 yyc01 yul01"; do
-    if echo $(hostname) | grep -q $site; then
+    if [[ "$HOSTNAME" =~ "$site" ]]; then
         HOSTS_ALLOW=$(grep 'hosts allow' $SLICEHOME/conf/rsyncd.conf.in)
-        echo "    ${HOSTS_ALLOW}, 192.211.124.208/28" > /etc/rsyncd.conf
+        echo "    ${HOSTS_ALLOW}, 192.211.124.208/28" >> /etc/rsyncd.conf
     fi
 done
 
