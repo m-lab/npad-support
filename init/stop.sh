@@ -12,8 +12,10 @@ DIAG_SERVER_OPTS="-d -u $USER -p $PIDFILE"
 if [ -f $PIDFILE ]; then
 	killall redisplay.py || :
 	killall exitstats.py || :
+	killall paris_rollins.py || :
 	killall tcpdump || : 	
 	killall -9 tdump8000.py || : 	# does not respect sigterm
+	service httpd stop
 	pid=`cat $PIDFILE`
 	if [ "`ps -p $pid -o comm=`" = "DiagServer.py" ]; then
 		kill $pid

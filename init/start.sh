@@ -18,6 +18,7 @@ if [ -f $PIDFILE ]; then
 		exit 1
 	fi
 fi
+service httpd start
 ${DIAG_SERVER_DAEMON} ${DIAG_SERVER_OPTS}
 echo "NPAD server started."
 $SLICEHOME/build/redisplay.py -daemon $SLICEHOME/VAR/www/ServerData $RSYNCDIR_NPAD $MYNODE &
