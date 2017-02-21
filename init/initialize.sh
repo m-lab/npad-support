@@ -16,16 +16,11 @@ killall /usr/bin/python     || true
 killall /usr/sbin/tcpdump   || true
 
 echo "Install required packages and perform System Update"
-# echo "Check/Install system tools"
-[ -f $SLICEHOME/.yumdone2 ] || \
-    (
-        rm -f $SLICEHOME/.yumdone*
-        yum install -y httpd gnuplot-py gnuplot
-        yum install -y paris-traceroute
-        yum install -y python-pip
-        touch $SLICEHOME/.yumdone2
-        pip install prometheus_client
-    )
+yum install -y httpd gnuplot-py gnuplot
+yum install -y paris-traceroute
+yum install -y python-pip
+pip install prometheus_client
+
 # make sure that everything is up to date
 yum update -y
 
