@@ -1,0 +1,37 @@
+dist: trusty
+language: ruby
+services:
+- docker
+
+script:
+        # TODO - change to :latest
+- docker pull gcr.io/mlab-sandbox/github-m-lab-builder:travis
+- ls
+- docker run -v `pwd`/slicebase-i386:/root/builder/build/slicebase-i386 -v `pwd`/bin:/root/bin
+  gcr.io/mlab-sandbox/github-m-lab-builder:travis /root/bin/build_npad.sh
+- $TRAVIS_BUILD_DIR/travis/install_gcloud.sh
+
+before_install:
+- if [[ -n "$encrypted_9bceeca3f3aa_iv" ]] ; then
+  openssl aes-256-cbc -d
+  -K $encrypted_9bceeca3f3aa_key -iv $encrypted_9bceeca3f3aa_iv
+  -in $TRAVIS_BUILD_DIR/travis/legacy-rpm-writer.json.enc
+  -out /tmp/legacy-rpm-writer.json -d ; fi
+
+
+  # NB: Travis has a Google AppEngine (gae) provider, however it does not work
+  # # here (unknown).
+  # # Deploy steps never trigger on a new Pull Request. Deploy steps will trigger
+  # # after a merge with matching "on:" conditions.
+  #
+deploy:
+# SANDBOX: before code review for development code in a specific branch.
+ - provider: script
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json
+   skip_cleanup: true
+   on:
+     repo: gfr10598/npad-support
+     # Consider all branches and match using the condition. By default
+     # "all_branches" is false, and the condition is ignored.
+     all_branches: true
+     condition: $TRAVIS_BRANCH =~ 1.5.7.pre1*
