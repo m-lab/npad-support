@@ -1,0 +1,55 @@
+dist: trusty
+language: ruby
+services:
+- docker
+
+
+before_install:
+# If an encryption key exists, this will decrypt the service-account key.
+# m-lab repo
+- if [[ -n "$encrypted_5e545a9d5aeb_iv" ]] ; then
+  openssl aes-256-cbc -d
+  -K $encrypted_9bceeca3f3aa_key -iv $encrypted_9bceeca3f3aa_iv
+  -in $TRAVIS_BUILD_DIR/travis/legacy-rpm-writer.json.m-lab
+  -out /tmp/legacy-rpm-writer.json -d ; fi
+# gfr10598 fork
+- if [[ -n "$encrypted_9bceeca3f3aa_iv" ]] ; then
+  openssl aes-256-cbc -d
+  -K $encrypted_9bceeca3f3aa_key -iv $encrypted_9bceeca3f3aa_iv
+  -in $TRAVIS_BUILD_DIR/travis/legacy-rpm-writer.json.gfr10598
+  -out /tmp/legacy-rpm-writer.json ; fi
+
+script:
+# TODO - change to :latest
+# This script builds the rpm using the docker container, getting
+# the build params from the travis environment variables.
+- $TRAVIS_BUILD_DIR/travis/container_build.sh
+
+# TODO: Travis has GCS deployment, so we should probably try using that
+# instead of script.
+deploy:
+# TESTING: before code review for development in forked repos.
+ - provider: script
+   on:
+     all_branches: true
+     condition: $TRAVIS_REPO_SLUG != m-lab/npad-support
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json testing
+   skip_cleanup: true
+
+# UNTAGGED: Main repo, master branch, but untagged.
+ - provider: script
+   on:
+     repo: m-lab/npad-support
+     all_branches: true
+     tags: false
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json untagged
+   skip_cleanup: true
+
+# STAGING: Main repo, master branch, with tag --> deploy to staging.
+ - provider: script
+   on:
+     repo: m-lab/npad-support
+     tags: true
+     condition: $TRAVIS_EVENT_TYPE = push
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json staging
+   skip_cleanup: true
