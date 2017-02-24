@@ -3,6 +3,7 @@ set -x
 set -e
 
 KEYFILE=${1:?Please provide the service account key file}
+FOLDER=${2:-new}
 
 # Add gcloud to PATH.
 source "${HOME}/google-cloud-sdk/path.bash.inc"
@@ -18,6 +19,6 @@ gcloud auth activate-service-account --key-file "${KEYFILE}"
 # a privileged account:
 # gsutil acl ch -u legacy-rpm-writer@mlab-sandbox.iam.gserviceaccount.com:W \
 #  gs://legacy-rpms-mlab-sandbox
-gsutil cp slicebase-i386/i686/*.rpm gs://legacy-rpms-mlab-sandbox/new
+gsutil cp slicebase-i386/i686/*.rpm gs://legacy-rpms-mlab-sandbox/$FOLDER/
 
 exit 0
