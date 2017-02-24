@@ -29,8 +29,6 @@ script:
   -v `pwd`/bin:/root/bin
   gcr.io/mlab-sandbox/github-m-lab-builder:travis
   /root/bin/build_npad.sh $TRAVIS_REPO_SLUG $TRAVIS_BRANCH
-# Should we do this only when deploying?
-- $TRAVIS_BUILD_DIR/travis/install_gcloud.sh
 
 # NB: Travis has a Google AppEngine (gae) provider, however it does not work
 # # here (unknown).

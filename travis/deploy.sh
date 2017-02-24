@@ -5,6 +5,8 @@ set -e
 KEYFILE=${1:?Please provide the service account key file}
 FOLDER=${2:-new}
 
+$TRAVIS_BUILD_DIR/travis/install_gcloud.sh
+
 # Add gcloud to PATH.
 source "${HOME}/google-cloud-sdk/path.bash.inc"
 
