@@ -30,18 +30,35 @@ script:
   gcr.io/mlab-sandbox/github-m-lab-builder:travis
   /root/bin/build_npad.sh $TRAVIS_REPO_SLUG $TRAVIS_BRANCH
 
-# NB: Travis has a Google AppEngine (gae) provider, however it does not work
-# # here (unknown).
+# TODO: Travis has GCS deployment, so we should probably try using that
+# instead of script.
 deploy:
-# gfr SANDBOX: before code review for development code in a specific branch.
+# TESTING: before code review for development in forked repos.
  - provider: script
-   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json gfr
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json testing
    skip_cleanup: true
    on:
-     repo: gfr10598/npad-support
      all_branches: true
+     condition: $TRAVIS_EVENT = push
+     condition: $TRAVIS_REPO_SLUG != m-lab/npad-support
 
-# STAGING: When master branch also has a tag, deploy to cloud storage.
+# PULL REQUESTS: All pull requests will push to pull-request folder.
+ - provider: script
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json pull-request
+   skip_cleanup: true
+   on:
+     condition: $TRAVIS_EVENT = pull_request
+
+# UNTAGGED: Main repo, master branch, but untagged.
+ - provider: script
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json untagged
+   skip_cleanup: true
+   on:
+     repo: m-lab/npad-support
+     branch: master
+     tags: false
+
+# STAGING: Main repo, master branch, with tag --> deploy to staging.
  - provider: script
    script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json staging
    skip_cleanup: true
