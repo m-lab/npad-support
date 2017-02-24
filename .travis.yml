@@ -3,7 +3,6 @@ language: ruby
 services:
 - docker
 
-
 before_install:
 # If an encryption key exists, this will decrypt the service-account key.
 # m-lab repo
