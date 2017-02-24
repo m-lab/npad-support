@@ -3,6 +3,7 @@ language: ruby
 services:
 - docker
 
+
 before_install:
 # If an encryption key exists, this will decrypt the service-account key.
 # m-lab repo
@@ -20,15 +21,9 @@ before_install:
 
 script:
 # TODO - change to :latest
-- docker pull gcr.io/mlab-sandbox/github-m-lab-builder:travis
-- ls
-# This runs build_npad.sh in the docker container, providing the
-# repository and branch to build.
-- docker run
-  -v `pwd`/slicebase-i386:/root/builder/build/slicebase-i386
-  -v `pwd`/bin:/root/bin
-  gcr.io/mlab-sandbox/github-m-lab-builder:travis
-  /root/bin/build_npad.sh $TRAVIS_REPO_SLUG $TRAVIS_BRANCH
+# This script builds the rpm using the docker container, getting
+# the build params from the travis environment variables.
+- $TRAVIS_BUILD_DIR/travis/container_build.sh
 
 # TODO: Travis has GCS deployment, so we should probably try using that
 # instead of script.
@@ -39,8 +34,7 @@ deploy:
    skip_cleanup: true
    on:
      all_branches: true
-     condition: $TRAVIS_EVENT = push
-     condition: $TRAVIS_REPO_SLUG != m-lab/npad-support
+     condition: $TRAVIS_EVENT = push && $TRAVIS_REPO_SLUG != m-lab/npad-support
 
 # PULL REQUESTS: All pull requests will push to pull-request folder.
  - provider: script
