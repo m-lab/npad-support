@@ -3,8 +3,8 @@
 #   Handles gcloud credentials.
 #   On successful build (on pushes only) deploys rpm to legacy-rpms-mlab-sandbox.
 #     * On tagged build from m-lab repo, pushes rpm to 'staging' folder.
-#     * On untagged builds from m-lab repo, pushes rpm to 'untagged' folder.
-#     * On all builds from other repos, pushes rpm to 'testing' folder.
+#     * On untagged builds from m-lab repo master branch, pushes rpm to 'master' folder.
+#     * On all builds from other repos, pushes rpm to 'private' folder.
 
 dist: trusty
 language: ruby
@@ -28,32 +28,32 @@ before_install:
   -out /tmp/legacy-rpm-writer.json ; fi
 
 script:
-# TODO - change to :latest
+# TODO - change script to use :latest instead of :travis.
 # This script builds the rpm using the docker container, getting
 # the build params from the travis environment variables.
 - $TRAVIS_BUILD_DIR/travis/container_build.sh
 
-# TODO: Travis has GCS deployment, so we should probably try using that
-# instead of script.
+# TODO: Travis has GCS deployment, but for now, we like the security
+# provided by using the service account.
 deploy:
-# TESTING: before code review for development in forked repos.
+# PRIVATE: before code review for development in forked repos.
  - provider: script
    on:
      all_branches: true
      condition: $TRAVIS_REPO_SLUG != m-lab/npad-support
-   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json testing
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json private
    skip_cleanup: true
 
-# UNTAGGED: Main repo, master branch, but untagged.
+# MASTER: Main repo, master branch, but untagged.
  - provider: script
    on:
      repo: m-lab/npad-support
-     all_branches: true
+     branch: master
      tags: false
-   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json untagged
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json master
    skip_cleanup: true
 
-# STAGING: Main repo, master branch, with tag --> deploy to staging.
+# STAGING: Main repo, with tag --> deploy to staging.
  - provider: script
    on:
      repo: m-lab/npad-support
