@@ -1,3 +1,11 @@
+# This travis config:
+#   Invokes contain_build.sh to build npad-support using a docker build container.
+#   Handles gcloud credentials.
+#   On successful build (on pushes only) deploys rpm to legacy-rpms-mlab-sandbox.
+#     * On tagged build from m-lab repo, pushes rpm to 'staging' folder.
+#     * On untagged builds from m-lab repo, pushes rpm to 'untagged' folder.
+#     * On all builds from other repos, pushes rpm to 'testing' folder.
+
 dist: trusty
 language: ruby
 services:
@@ -5,13 +13,14 @@ services:
 
 before_install:
 # If an encryption key exists, this will decrypt the service-account key.
-# m-lab repo
+# m-lab repo (Note the .m-lab suffix on the encrypted key file.)
 - if [[ -n "$encrypted_5e545a9d5aeb_iv" ]] ; then
   openssl aes-256-cbc -d
-  -K $encrypted_9bceeca3f3aa_key -iv $encrypted_9bceeca3f3aa_iv
+  -K $encrypted_5e545a9d5aeb_iv -iv $encrypted_5e545a9d5aeb_iv
   -in $TRAVIS_BUILD_DIR/travis/legacy-rpm-writer.json.m-lab
   -out /tmp/legacy-rpm-writer.json -d ; fi
-# gfr10598 fork
+
+# gfr10598 fork (Note the .gfr10598 suffix on the encrypted key file.)
 - if [[ -n "$encrypted_9bceeca3f3aa_iv" ]] ; then
   openssl aes-256-cbc -d
   -K $encrypted_9bceeca3f3aa_key -iv $encrypted_9bceeca3f3aa_iv
