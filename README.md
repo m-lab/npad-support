@@ -8,8 +8,9 @@ This repository is now configured with travis-ci integration through
 it's .travis.yml file.  For any fork with travis enabled, pushes and
 pull-requests trigger building the rpm on travis.
 
-Successful pushes will also trigger writing of the rpm to google cloud
-storage at gs://legacy-rpms-mlab-sandbox.
+Pushes with successful builds will also trigger writing of the rpm to
+google cloud storage at gs://legacy-rpms-mlab-sandbox.  See travis file
+for details about which folder the rpm is pushed to.
 
 ## Legacy build
 In the past, this package was built using an mlab-builder machine, using
