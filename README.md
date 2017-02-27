@@ -16,19 +16,23 @@ for details about which folder the rpm is pushed to.
 With the build automation, rpm builds should be almost reproducible, with
 exceptions for embedded dates, and possible library upgrades.
 
-This opens the possibility of rebuilding the rpms between some of the 
-verification steps.  With the current travis deployment rules, we could,
-for example:
-* Developer does basic testing on rpm pushed to 'private' folder.
-* When PR merged with master, auto-deploy rpm from 'master' folder to
-  test sites and verify correct behavior.
-* On success deploy to test sites, tag the commit with a deployment tag,
-  triggering new rpm pushed to 'staging'.  Auto-push new rpm to test-bed.
-  If test-bed testing is successful, and test site monitoring is green,
-  then auto-push to canary sites.  Copy rpm to canary folder.
-* After successful monitoring on canary sites, manually promote the same
-  rpm from canary folder to production folder, triggering full deployment
-  to all sites.
+This opens the possibility of rebuilding the rpms between some of the
+verification steps.  With the slightly modified travis deployment rules,
+we could, for example:
+* Developer does basic testing on rpm pushed to 'private' folder, in sandbox
+  project.
+* When PR is merged into upstream branch, typically 'dev', travis will
+  automatically write a new rpm into a testing folder.  From there it
+  should be loaded onto the test-bed for initial testing.
+* On successful testing, the same commit will be tagged, triggering
+  rebuilding of the rpm, and writing to the staging project.  From there
+  it will be used to canary the package on staging machines.
+* On successful canary, the rpm should be PROMOTED to the production rpm
+  repository, and the production machines triggered to install it.  The
+  rpm is copied rather than rebuilt to ensure that we are deploying the
+  same code that passed the canary tests.  At the same time, the 'dev'
+  branch is merged into the master branch.  Since the tag is associated
+  with the git hash, master HEAD is now associated with the tag as well.
 
 ## Legacy build
 In the past, this package has been built using an mlab-builder machine,
