@@ -20,6 +20,7 @@ before_install:
   -in $TRAVIS_BUILD_DIR/travis/legacy-rpm-writer.m-lab.enc
   -out /tmp/legacy-rpm-writer.json -d ; fi
 
+# TODO: remove this key when active development is finished.
 # gfr10598 fork (Note the .gfr10598 suffix on the encrypted key file.)
 - if [[ -n "$encrypted_9bceeca3f3aa_iv" ]] ; then
   openssl aes-256-cbc -d
@@ -35,6 +36,8 @@ script:
 
 # TODO: Travis has GCS deployment, but for now, we like the security
 # provided by using the service account.
+# TODO: Update the deployment destinations to match the process outlined
+# in README.md
 deploy:
 # PRIVATE: before code review for development in forked repos.
  - provider: script
