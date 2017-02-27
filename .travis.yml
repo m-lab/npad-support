@@ -1,0 +1,66 @@
+# This travis config:
+#   Invokes contain_build.sh to build npad-support using a docker build container.
+#   Handles gcloud credentials.
+#   On successful build (on pushes only) deploys rpm to legacy-rpms-mlab-sandbox.
+#     * On tagged build from m-lab repo, pushes rpm to 'staging' folder.
+#     * On untagged builds from m-lab repo master branch, pushes rpm to 'master' folder.
+#     * On all builds from other repos, pushes rpm to 'private' folder.
+
+dist: trusty
+language: ruby
+services:
+- docker
+
+before_install:
+# If an encryption key exists, this will decrypt the service-account key.
+# m-lab repo (Note the .m-lab suffix on the encrypted key file.)
+- if [[ -n "$encrypted_5e545a9d5aeb_iv" ]] ; then
+  openssl aes-256-cbc -d
+  -K $encrypted_5e545a9d5aeb_iv -iv $encrypted_5e545a9d5aeb_iv
+  -in $TRAVIS_BUILD_DIR/travis/legacy-rpm-writer.m-lab.enc
+  -out /tmp/legacy-rpm-writer.json -d ; fi
+
+# TODO: remove this key when active development is finished.
+# gfr10598 fork (Note the .gfr10598 suffix on the encrypted key file.)
+- if [[ -n "$encrypted_9bceeca3f3aa_iv" ]] ; then
+  openssl aes-256-cbc -d
+  -K $encrypted_9bceeca3f3aa_key -iv $encrypted_9bceeca3f3aa_iv
+  -in $TRAVIS_BUILD_DIR/travis/legacy-rpm-writer.gfr10598.enc
+  -out /tmp/legacy-rpm-writer.json ; fi
+
+script:
+# TODO - change script to use :latest instead of :travis.
+# This script builds the rpm using the docker container, getting
+# the build params from the travis environment variables.
+- $TRAVIS_BUILD_DIR/travis/container_build.sh
+
+# TODO: Travis has GCS deployment, but for now, we like the security
+# provided by using the service account.
+# TODO: Update the deployment destinations to match the process outlined
+# in README.md
+deploy:
+# PRIVATE: before code review for development in forked repos.
+ - provider: script
+   on:
+     all_branches: true
+     condition: $TRAVIS_REPO_SLUG != m-lab/npad-support
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json private
+   skip_cleanup: true
+
+# MASTER: Main repo, master branch, but untagged.
+ - provider: script
+   on:
+     repo: m-lab/npad-support
+     branch: master
+     tags: false
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json master
+   skip_cleanup: true
+
+# STAGING: Main repo, with tag --> deploy to staging.
+ - provider: script
+   on:
+     repo: m-lab/npad-support
+     tags: true
+     condition: $TRAVIS_EVENT_TYPE = push
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json staging
+   skip_cleanup: true
