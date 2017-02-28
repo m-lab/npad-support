@@ -16,7 +16,7 @@ before_install:
 # m-lab repo (Note the .m-lab suffix on the encrypted key file.)
 - if [[ -n "$encrypted_5e545a9d5aeb_iv" ]] ; then
   openssl aes-256-cbc -d
-  -K $encrypted_5e545a9d5aeb_iv -iv $encrypted_5e545a9d5aeb_iv
+  -K $encrypted_5e545a9d5aeb_key -iv $encrypted_5e545a9d5aeb_iv
   -in $TRAVIS_BUILD_DIR/travis/legacy-rpm-writer.m-lab.enc
   -out /tmp/legacy-rpm-writer.json -d ; fi
 
