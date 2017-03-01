@@ -4,8 +4,7 @@
 
 * install_gcloud.sh - Script to install gcloud tools.
 
-* legacy-rpm-writer.*.enc - encrypted GCS service account keys.
-These contain the same content, but are encrypted with different keys.
+* legacy-rpm-writer.json.enc - encrypted GCS service account key.
 
 * deploy.sh - script to deploy rpm to GCS (google cloud storage).
 
