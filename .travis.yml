@@ -20,13 +20,7 @@ before_install:
 # If an encryption key exists, this will decrypt the service-account keys.
 # This may fail if the key has been overwritten since the file was
 # encoded.
-- if [[ -n "$encrypted_9bceeca3f3aa_iv" ]] ; then
-    openssl aes-256-cbc -d
-    -K $encrypted_9bceeca3f3aa_key -iv $encrypted_9bceeca3f3aa_iv
-    -in $TRAVIS_BUILD_DIR/travis/service-accounts.tar.enc
-    -out /tmp/service-accounts.tar ; fi
-- if [[ -n "$encrypted_9bceeca3f3aa_iv" ]] ; then
-    tar -C /tmp -xfv /tmp/service-accounts.tar ; fi
+- $TRAVIS_BUILD_DIR/travis/decrypt.sh
 
 script:
 # TODO - change script to use :latest instead of :travis.
@@ -34,10 +28,8 @@ script:
 # the build params from the travis environment variables.
 - $TRAVIS_BUILD_DIR/travis/container_build.sh
 
-# TODO: Travis has GCS deployment, but for now, we like the security
-# provided by using the service account.
-# TODO: Update the deployment destinations to match the process outlined
-# in README.md
+# TODO: Travis has GCS deployment support, but for now, we like
+# the security provided by using the service account.
 deploy:
 # PRIVATE: before code review for development in forked repos.
  - provider: script
