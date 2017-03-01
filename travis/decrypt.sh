@@ -32,10 +32,13 @@
 #     this script is located).
 #  8. Commit to an appropriate branch, generate PR, and send for review.
 
+set -x
+set -e
 if [[ -n "$encrypted_9bceeca3f3aa_iv" ]] ; then
   openssl aes-256-cbc -d \
     -K $encrypted_9bceeca3f3aa_key -iv $encrypted_9bceeca3f3aa_iv \
     -in $TRAVIS_BUILD_DIR/travis/service-accounts.tar.enc \
-    -out /tmp/service-accounts.tar 
-  tar -C /tmp -xvf /tmp/service-accounts.tar ; fi
+    -out /tmp/service-accounts.tar
+  tar -C /tmp -xvf /tmp/service-accounts.tar ;
+fi
 

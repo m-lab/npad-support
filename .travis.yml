@@ -16,17 +16,17 @@ language: ruby
 services:
 - docker
 
-before_install:
-# If an encryption key exists, this will decrypt the service-account keys.
-# This may fail if the key has been overwritten since the file was
-# encoded.
-- $TRAVIS_BUILD_DIR/travis/decrypt.sh
-
 script:
 # TODO - change script to use :latest instead of :travis.
 # This script builds the rpm using the docker container, getting
 # the build params from the travis environment variables.
 - $TRAVIS_BUILD_DIR/travis/container_build.sh
+
+before_deploy:
+# If an encryption key exists, this will decrypt the service-account keys.
+# This may fail if the key has been overwritten since the file was
+# encoded.
+- $TRAVIS_BUILD_DIR/travis/decrypt.sh
 
 # TODO: Travis has GCS deployment support, but for now, we like
 # the security provided by using the service account.
