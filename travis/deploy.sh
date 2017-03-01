@@ -3,7 +3,7 @@ set -x
 set -e
 
 KEYFILE=${1:?Please provide the service account key file}
-PATH=${2:?Please provide destinate gs://PATH}
+PATH=${2:?Please provide destination path - gs://PATH}
 
 $TRAVIS_BUILD_DIR/travis/install_gcloud.sh
 
