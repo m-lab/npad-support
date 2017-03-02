@@ -3,7 +3,7 @@
 #   container.
 #   Handles gcloud credentials.
 #   On successful build (on pushes only) deploys rpm to a GCS bucket.
-#     * On all builds from other repos, pushes rpm to
+#     * On sandbox-* branches, successful builds will push rpm to
 #       legacy-rpms-mlab-sandbox, to owner/repo/branch folder.
 #     * On untagged builds from m-lab repo dev branch, pushes rpm
 #       legacy-rpms-mlab-staging, to testing folder.
@@ -31,6 +31,7 @@ before_deploy:
 # the security provided by using the service account.
 deploy:
 # PRIVATE: before code review for development in forked repos.
+# Branches with prefix is sandbox- will attempt to write to sandbox bucket.
  - provider: script
    on:
      all_branches: true

@@ -9,8 +9,8 @@ it's .travis.yml file.  For any fork with travis enabled, pushes and
 pull-requests trigger building the rpm on travis.
 
 Pushes with successful builds will also trigger writing of the rpm to
-google cloud storage at gs://legacy-rpms-mlab-sandbox.  See travis file
-for details about which folder the rpm is pushed to.
+google cloud storage at gs://legacy-rpms-mlab-{sandbox, staging}.
+See travis file for details about which folder the rpm is pushed to.
 
 ## Possible new deployment process
 With the build automation, rpm builds should be almost reproducible, with
@@ -19,8 +19,8 @@ exceptions for embedded dates, and possible library upgrades.
 This opens the possibility of rebuilding the rpms between some of the
 verification steps.  With the slightly modified travis deployment rules,
 we could, for example:
-* Developer does basic testing on rpm pushed to 'private' folder, in sandbox
-  project.
+* Developer uses a sandbox-* branch, so rpm is pushed to 'private'
+  folder, in sandbox project.
 * When PR is merged into upstream branch, typically 'dev', travis will
   automatically write a new rpm into a testing folder.  From there it
   should be loaded onto the test-bed for initial testing.
