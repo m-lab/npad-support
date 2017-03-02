@@ -1,25 +1,19 @@
 # This travis config:
-#   Invokes contain_build.sh to build npad-support using a docker build container.
+#   Invokes contain_build.sh to build npad-support using a docker build
+#   container.
 #   Handles gcloud credentials.
-#   On successful build (on pushes only) deploys rpm to legacy-rpms-mlab-sandbox.
-#     * On tagged build from m-lab repo, pushes rpm to 'staging' folder.
-#     * On untagged builds from m-lab repo master branch, pushes rpm to 'master' folder.
-#     * On all builds from other repos, pushes rpm to 'private' folder.
+#   On successful build (on pushes only) deploys rpm to a GCS bucket.
+#     * On sandbox-* branches, or forks, successful builds will push rpm to
+#       legacy-rpms-mlab-sandbox, to owner/repo/branch folder.
+#     * On untagged builds from m-lab repo dev branch, pushes rpm
+#       legacy-rpms-mlab-staging, to testing folder.
+#     * On tagged builds from m-lab repo, pushes rpm to
+#       legacy-rpms-mlab-staging, to staging folder.
 
 dist: trusty
 language: ruby
 services:
 - docker
-
-before_install:
-# If an encryption key exists, this will decrypt the service-account key.
-# This may fail if the key has been overwritten since the file was
-# encoded.
-- if [[ -n "$encrypted_9bceeca3f3aa_iv" ]] ; then
-  openssl aes-256-cbc -d
-  -K $encrypted_9bceeca3f3aa_key -iv $encrypted_9bceeca3f3aa_iv
-  -in $TRAVIS_BUILD_DIR/travis/legacy-rpm-writer.json.enc
-  -out /tmp/legacy-rpm-writer.json ; fi
 
 script:
 # TODO - change script to use :latest instead of :travis.
@@ -27,33 +21,40 @@ script:
 # the build params from the travis environment variables.
 - $TRAVIS_BUILD_DIR/travis/container_build.sh
 
-# TODO: Travis has GCS deployment, but for now, we like the security
-# provided by using the service account.
-# TODO: Update the deployment destinations to match the process outlined
-# in README.md
+before_deploy:
+# If an encryption key exists, this will decrypt the service-account keys.
+# This may fail if the key has been overwritten since the file was
+# encoded.
+- $TRAVIS_BUILD_DIR/travis/decrypt.sh
+
+# TODO: Travis has GCS deployment support, but for now, we like
+# the security provided by using the service account.
 deploy:
-# PRIVATE: before code review for development in forked repos.
+# PRIVATE: For development in forked repos, or branches starting with
+# sandbox-, successful build will attempt to push rpm to sandbox bucket.
  - provider: script
    on:
      all_branches: true
-     condition: $TRAVIS_REPO_SLUG != m-lab/npad-support
-   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json private
+     condition: $TRAVIS_REPO_SLUG != m-lab/npad-support || $TRAVIS_BRANCH =~ sandbox-*
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.mlab-sandbox.json legacy-rpms-mlab-sandbox/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH
    skip_cleanup: true
 
-# MASTER: Main repo, master branch, but untagged.
+# TEST: Main repo, dev branch, untagged -> deploy to staging/testing
  - provider: script
    on:
      repo: m-lab/npad-support
-     branch: master
+     branch: dev
      tags: false
-   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json master
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.mlab-staging.json legacy-rpms-mlab-staging/testing
    skip_cleanup: true
 
-# STAGING: Main repo, with tag --> deploy to staging.
+# STAGING: Main repo, with tag --> deploy to staging for canary
+# These will later be promoted through a separate process from staging
+# to legacy-rpms-mlab-oti
  - provider: script
    on:
      repo: m-lab/npad-support
      tags: true
      condition: $TRAVIS_EVENT_TYPE = push
-   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.json staging
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.mlab-staging.json legacy-rpms-mlab-staging/staging
    skip_cleanup: true
