@@ -19,9 +19,9 @@ exceptions for embedded dates, and possible library upgrades.
 This opens the possibility of rebuilding the rpms between some of the
 verification steps.  With the slightly modified travis deployment rules,
 we could, for example:
-* Developer uses a sandbox-* branch, so rpm is pushed to 'private'
-  folder, in sandbox project.
-* When PR is merged into upstream branch, typically 'dev', travis will
+* Developer uses a private fork, or commits to a sandbox-* branch.   RPM
+  is pushed to 'private' folder, and developer can test prior to review.
+* When PR is merged into upstream 'dev' branch, travis will
   automatically write a new rpm into a testing folder.  From there it
   should be loaded onto the test-bed for initial testing.
 * On successful testing, the same commit will be tagged, triggering

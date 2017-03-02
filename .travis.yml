@@ -3,7 +3,7 @@
 #   container.
 #   Handles gcloud credentials.
 #   On successful build (on pushes only) deploys rpm to a GCS bucket.
-#     * On sandbox-* branches, successful builds will push rpm to
+#     * On sandbox-* branches, or forks, successful builds will push rpm to
 #       legacy-rpms-mlab-sandbox, to owner/repo/branch folder.
 #     * On untagged builds from m-lab repo dev branch, pushes rpm
 #       legacy-rpms-mlab-staging, to testing folder.
@@ -30,12 +30,12 @@ before_deploy:
 # TODO: Travis has GCS deployment support, but for now, we like
 # the security provided by using the service account.
 deploy:
-# PRIVATE: before code review for development in forked repos.
-# Branches with prefix is sandbox- will attempt to write to sandbox bucket.
+# PRIVATE: For development in forked repos, or branches starting with
+# sandbox-, successful build will attempt to push rpm to sandbox bucket.
  - provider: script
    on:
      all_branches: true
-     condition: $TRAVIS_REPO_SLUG != m-lab/npad-support && $TRAVIS_BRANCH =~ sandbox-*
+     condition: $TRAVIS_REPO_SLUG != m-lab/npad-support || $TRAVIS_BRANCH =~ sandbox-*
    script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.mlab-sandbox.json legacy-rpms-mlab-sandbox/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH
    skip_cleanup: true
 
