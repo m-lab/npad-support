@@ -15,9 +15,9 @@ source "${HOME}/google-cloud-sdk/path.bash.inc"
 # https://cloud.google.com/sdk/gcloud/reference/auth/activate-service-account
 gcloud auth activate-service-account --key-file "${KEYFILE}"
 
-# For this to succeed, the provided keyfile must provide W access to the
-# specified bucket.  This is arranged by executing this from
-# a privileged account:
+# For this to succeed, the specified bucket must have ACLs to allow W
+# access for the service account associated with the keyfile.  This is
+# arranged by executing, from a privileged account:
 # gsutil acl ch -u legacy-rpm-writer@PROJECT.iam.gserviceaccount.com:W \
 #  gs://BUCKET
 gsutil cp slicebase-i386/i686/*.rpm gs://${PATH}/

@@ -2,14 +2,13 @@
 #   Invokes contain_build.sh to build npad-support using a docker build
 #   container.
 #   Handles gcloud credentials.
-#   On successful build (on pushes only) deploys rpm to
-#   legacy-rpms-mlab-xxx.
+#   On successful build (on pushes only) deploys rpm to a GCS bucket.
 #     * On all builds from other repos, pushes rpm to
 #       legacy-rpms-mlab-sandbox, to owner/repo/branch folder.
 #     * On untagged builds from m-lab repo dev branch, pushes rpm
 #       legacy-rpms-mlab-staging, to testing folder.
 #     * On tagged builds from m-lab repo, pushes rpm to
-#       legacy-rpms-mlab-staging, to canary folder.
+#       legacy-rpms-mlab-staging, to staging folder.
 
 dist: trusty
 language: ruby
@@ -35,7 +34,7 @@ deploy:
  - provider: script
    on:
      all_branches: true
-     condition: $TRAVIS_REPO_SLUG != m-lab/npad-support
+     condition: $TRAVIS_REPO_SLUG != m-lab/npad-support && $TRAVIS_BRANCH =~ sandbox-*
    script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.mlab-sandbox.json legacy-rpms-mlab-sandbox/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH
    skip_cleanup: true
 
@@ -48,13 +47,13 @@ deploy:
    script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.mlab-staging.json legacy-rpms-mlab-staging/testing
    skip_cleanup: true
 
-# STAGING: Main repo, with tag --> deploy to staging/canary
+# STAGING: Main repo, with tag --> deploy to staging for canary
 # These will later be promoted through a separate process from staging
-# to legacy-rpms-mlab-oti (or maybe legacy-rpms-mlab-prod ???
+# to legacy-rpms-mlab-oti
  - provider: script
    on:
      repo: m-lab/npad-support
      tags: true
      condition: $TRAVIS_EVENT_TYPE = push
-   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.mlab-staging.json legacy-rpms-mlab-staging/canary
+   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.mlab-staging.json legacy-rpms-mlab-staging/staging
    skip_cleanup: true

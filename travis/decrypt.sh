@@ -9,8 +9,8 @@
 # In the event that the encryption keys are lost, there are a few
 # steps that have to be taken to restore functionality.
 #  1. If the SA keys are available, skip to step 4.
-#  2. Create new service accounts for mlab-sandbox and mlab-staging,
-#     downloading the key files during creation.
+#  2. Create new service accounts or new keys for existing account, for
+#     mlab-sandbox and mlab-staging, downloading the json key files.
 #  3. Update the ACLs, e.g.
 #     gsutil acl ch -R -u \
 #       legacy-rpm-writer@mlab-sandbox.iam.gserviceaccount.com:W \
