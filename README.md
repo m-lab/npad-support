@@ -34,6 +34,17 @@ we could, for example:
   branch is merged into the master branch.  Since the tag is associated
   with the git hash, master HEAD is now associated with the tag as well.
 
+## Building Locally/Manually
+Until Issue #37 is resolved, it is necessary to build new npad package versions manually instead of using Travis. Use the commands below to clone the npad-support repo and build a new version in a docker container. 
+
+```
+$ git clone git@github.com:m-lab/npad-support.git
+$ cd npad-support
+$ VIS_REPO_SLUG=m-lab/npad-support TRAVIS_BRANCH=dev ./travis/container_build.sh
+```
+
+Assuming the build succeeded, you can find the newly build .rpm in the folder **npad-support/slicebase-i386/**
+
 ## Legacy build
 In the past, this package has been built using an mlab-builder machine,
 using the following commands:
