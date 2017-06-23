@@ -18,6 +18,8 @@ fi
 
 # SETUP development environment
 yum groupinstall -y 'Development Tools'
+# The web100 autogen.sh requires which.
+yum install -y which
 if ! rpm -q gtk2-devel &> /dev/null ; then
     # while we do not link to these libraries they are 
     # needed for 'autogen.sh' to work correctly.
