@@ -15,6 +15,9 @@ language: ruby
 services:
 - docker
 
+install:
+- pip install google-compute-engine
+
 script:
 # TODO - change script to use :latest instead of :travis.
 # This script builds the rpm using the docker container, getting
