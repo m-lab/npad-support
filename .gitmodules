@@ -10,3 +10,6 @@
 [submodule "package"]
 	path = package
 	url = https://github.com/m-lab/package.git
+[submodule "travis"]
+	path = travis
+	url = https://github.com/m-lab/travis.git

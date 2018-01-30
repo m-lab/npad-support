@@ -1,63 +1,41 @@
-# This travis config:
-#   Invokes contain_build.sh to build npad-support using a docker build
-#   container.
-#   Handles gcloud credentials.
-#   On successful build (on pushes only) deploys rpm to a GCS bucket.
-#     * On sandbox-* branches, or forks, successful builds will push rpm to
-#       legacy-rpms-mlab-sandbox, to owner/repo/branch folder.
-#     * On untagged builds from m-lab repo dev branch, pushes rpm
-#       legacy-rpms-mlab-staging, to testing folder.
-#     * On tagged builds from m-lab repo, pushes rpm to
-#       legacy-rpms-mlab-staging, to staging folder.
+language: python
+python:
+- '2.7'
 
-dist: trusty
-language: ruby
 services:
 - docker
 
-install:
-- pip install google-compute-engine
+cache:
+  pip: true
 
 script:
-# TODO - change script to use :latest instead of :travis.
-# This script builds the rpm using the docker container, getting
-# the build params from the travis environment variables.
-- $TRAVIS_BUILD_DIR/travis/container_build.sh
+  - pip install google-compute-engine
+  - $TRAVIS_BUILD_DIR/travis/install_gcloud.sh
+  - $TRAVIS_BUILD_DIR/travis/build_rpm.sh "./package/slicebuild.sh iupui_npad"
+    &> build.log || (cat build.log && false)
 
-before_deploy:
-# If an encryption key exists, this will decrypt the service-account keys.
-# This may fail if the key has been overwritten since the file was
-# encoded.
-- $TRAVIS_BUILD_DIR/travis/decrypt.sh
-
-# TODO: Travis has GCS deployment support, but for now, we like
-# the security provided by using the service account.
 deploy:
-# PRIVATE: For development in forked repos, or branches starting with
-# sandbox-, successful build will attempt to push rpm to sandbox bucket.
+ # Sandbox - unreviewed, untagged, deploy to gs://legacy-rpms-mlab-sandbox
  - provider: script
+   script: $TRAVIS_BUILD_DIR/travis/deploy_gcs.sh
+       "$SERVICE_ACCOUNT_mlab_sandbox"
+       $TRAVIS_BUILD_DIR/build/slicebase-i386/i686/iupui_npad-*.rpm
+       gs://legacy-rpms-mlab-sandbox/slicebase-i386/i686/
    on:
+     repo: m-lab/npad-support
      all_branches: true
-     condition: $TRAVIS_REPO_SLUG != m-lab/npad-support || $TRAVIS_BRANCH =~ sandbox-*
-   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.mlab-sandbox.json legacy-rpms-mlab-sandbox/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH
+     condition: $TRAVIS_BRANCH == sandbox-* && $TRAVIS_EVENT_TYPE == push
    skip_cleanup: true
 
-# TEST: Main repo, dev branch, untagged -> deploy to staging/testing
+ # STAGING - reviewed, untagged, deploy to gs://legacy-rpms-mlab-staging
  - provider: script
+   script: $TRAVIS_BUILD_DIR/travis/deploy_gcs.sh
+       "$SERVICE_ACCOUNT_mlab_staging"
+       $TRAVIS_BUILD_DIR/build/slicebase-i386/i686/iupui_npad-*.rpm
+       gs://legacy-rpms-mlab-staging/slicebase-i386/i686/
    on:
      repo: m-lab/npad-support
-     branch: dev
-     tags: false
-   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.mlab-staging.json legacy-rpms-mlab-staging/testing
+     all_branches: true
+     condition: $TRAVIS_BRANCH == master && $TRAVIS_EVENT_TYPE == push
    skip_cleanup: true
 
-# STAGING: Main repo, with tag --> deploy to staging for canary
-# These will later be promoted through a separate process from staging
-# to legacy-rpms-mlab-oti
- - provider: script
-   on:
-     repo: m-lab/npad-support
-     tags: true
-     condition: $TRAVIS_EVENT_TYPE = push
-   script: $TRAVIS_BUILD_DIR/travis/deploy.sh /tmp/legacy-rpm-writer.mlab-staging.json legacy-rpms-mlab-staging/staging
-   skip_cleanup: true
