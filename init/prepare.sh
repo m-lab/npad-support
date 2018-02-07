@@ -51,7 +51,7 @@ popd
 # This code shouldbe deleted when the bugfix migrates outwards.
 pushd $SOURCE_DIR/libparistraceroute
     ./autogen.sh
-    ./configure
+    ./configure --prefix=$BUILD_DIR/build
     make
     make install
 popd
