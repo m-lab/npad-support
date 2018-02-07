@@ -50,7 +50,7 @@ popd
 # Required because fix for overlapping PT bug is too new to be in upstream RPMs.
 # This code shouldbe deleted when the bugfix migrates outwards.
 pushd $SOURCE_DIR/libparistraceroute
-    ./augen.sh
+    ./autogen.sh
     ./configure
     make
     make install
