@@ -45,7 +45,17 @@ pushd $SOURCE_DIR/npad
     make
     make install
 popd
- 
+
+# build paris-traceroute
+# Required because fix for overlapping PT bug is too new to be in upstream RPMs.
+# This code shouldbe deleted when the bugfix migrates outwards.
+pushd $SOURCE_DIR/libparistraceroute
+    ./autogen.sh
+    ./configure --prefix=$BUILD_DIR/build
+    make
+    make install
+popd
+
 # install init scripts
 cp -r $SOURCE_DIR/init $BUILD_DIR/
 
