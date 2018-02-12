@@ -17,7 +17,9 @@ killall /usr/sbin/tcpdump   || true
 
 echo "Install required packages and perform System Update"
 yum install -y httpd gnuplot-py gnuplot
-yum install -y paris-traceroute
+# Commented out until fix for overlapping PT bug is in upstream .rpm
+# TODO: remove comment once bug fix is deployed to upstream
+# yum install -y paris-traceroute
 yum install -y python-pip
 pip install prometheus_client
 

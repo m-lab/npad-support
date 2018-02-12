@@ -1,18 +1,10 @@
-language: python
-python:
-- '2.7'
 
 services:
 - docker
 
-cache:
-  pip: true
-
 script:
-  - pip install google-compute-engine
   - $TRAVIS_BUILD_DIR/travis/install_gcloud.sh
-  - $TRAVIS_BUILD_DIR/travis/build_rpm.sh "./package/slicebuild.sh iupui_npad"
-    &> build.log || (cat build.log && false)
+  - $TRAVIS_BUILD_DIR/travis/build_rpm.sh "./package/slicebuild.sh iupui_npad" 
 
 deploy:
  # Sandbox - unreviewed, untagged, deploy to gs://legacy-rpms-mlab-sandbox
